@@ -27,7 +27,7 @@ Configurações
     SMSRequest requisicao = SMSRequest.builder()
         .phone("556296521489")
         .messageText("Mensagem")
-        .clientsMessageId("3245234")    //Id internet da Callink
+        .clientsMessageId("3245234")    //Id interno da Callink
         .build();
         
   Enviado SMS
