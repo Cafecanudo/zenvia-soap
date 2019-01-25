@@ -5,11 +5,14 @@
 *
 ## Descrição
 API de Envio e Checagem de SMS usando serviço de [Zenvia](https://www.zenvia.com/) usando serviços antigos(SOAP) de envio.
+
 ## Unidades de Test
 Cobertura de código
+
 ![](src/test/resources/covered.PNG)
 
 Tests implementados
+
 ![](src/test/resources/testes.PNG)
 
 ## Como usar
