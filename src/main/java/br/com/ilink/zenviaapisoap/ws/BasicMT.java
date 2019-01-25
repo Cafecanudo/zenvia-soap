@@ -5,14 +5,10 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebResult;
 import javax.jws.WebService;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.ws.RequestWrapper;
 import javax.xml.ws.ResponseWrapper;
 
 @WebService(name = "BasicMT", targetNamespace = "http://basic.webservice.gateway.springwireless.com/")
-@XmlSeeAlso({
-    ObjectFactory.class
-})
 public interface BasicMT {
 
   @WebMethod

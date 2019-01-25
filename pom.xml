@@ -89,6 +89,7 @@
   </profiles>
 
   <build>
+    <finalName>${artifactId}-${env}-${version}</finalName>
     <filters>
       <filter>src/main/filters/${env}.properties</filter>
     </filters>

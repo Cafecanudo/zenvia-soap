@@ -109,7 +109,7 @@ public class ZenviaAPITest {
   @Test
   public void testErroNoEnvioPhoneVazioValidacaoServidor() throws Exception {
     expectedException.expect(MTException.class);
-    expectedException.expectMessage("status=[MISSING_PARAMETER]: Missing phone");
+    expectedException.expectMessage("status=[INVALID_PARAMETER]: Invalid phone");
 
     SMSRequest req = new SMSRequest();
     req.setMessageText(randomAlphabetic(20));
