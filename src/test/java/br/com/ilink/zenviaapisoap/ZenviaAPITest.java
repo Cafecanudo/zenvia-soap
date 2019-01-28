@@ -6,11 +6,19 @@ import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.doReturn;
 import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 
 import br.com.ilink.zenviaapisoap.ZenviaAPI.EnviarSMS;
+import br.com.ilink.zenviaapisoap.exceptions.ProcessorException;
 import br.com.ilink.zenviaapisoap.exceptions.ValidationException;
 import br.com.ilink.zenviaapisoap.models.SMSRequest;
 import br.com.ilink.zenviaapisoap.models.SMSRequest.SMSRequestBuilder;
@@ -18,7 +26,9 @@ import br.com.ilink.zenviaapisoap.models.SMSResponse;
 import br.com.ilink.zenviaapisoap.models.SMSResponseCheckProtocolo;
 import br.com.ilink.zenviaapisoap.ws.MTException;
 import java.io.IOException;
+import java.util.List;
 import java.util.Properties;
+import org.hamcrest.collection.IsEmptyCollection;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -89,29 +99,36 @@ public class ZenviaAPITest {
   @Test
   public void testDeEnvioSucesso() throws Exception {
     SMSRequest req = SMSRequest.builder()
-        .phone("5562996020305")
+        .phone("553498" + randomNumeric(7))
+        .phone("553498" + randomNumeric(7))
+        .phone("553499" + randomNumeric(7))
+        .phone("553499" + randomNumeric(7))
         .messageText("Mensagem")
-        .clientsMessageId("3245234")
+        .clientsMessageId(randomNumeric(5))
         .build();
 
     EnviarSMS enviarSMS = ZenviaAPI.prepare(req);
     enviarSMS = spy(enviarSMS);
 
     doReturn(4564L)
-        .when(enviarSMS, "send");
+        .when(enviarSMS, "send", anyString());
 
-    SMSResponse resp = enviarSMS.enviar();
+    List<SMSResponse> resp = enviarSMS.enviar();
 
     assertThat(resp, is(notNullValue()));
-    assertThat(resp.getMessageId(), is(notNullValue()));
+    assertThat(resp, not(IsEmptyCollection.empty()));
+    assertThat(resp, is(hasSize(4)));
+    assertThat(resp, contains(new SMSResponse(4564L)
+        , new SMSResponse(4564L), new SMSResponse(4564L), new SMSResponse(4564L)));
   }
 
   @Test
   public void testErroNoEnvioPhoneVazioValidacaoServidor() throws Exception {
-    expectedException.expect(MTException.class);
+    expectedException.expect(ProcessorException.class);
     expectedException.expectMessage("status=[INVALID_PARAMETER]: Invalid phone");
 
     SMSRequest req = new SMSRequest();
+    req.addPhone("");
     req.setMessageText(randomAlphabetic(20));
     req.setClientsMessageId(randomNumeric(10));
 
@@ -123,11 +140,12 @@ public class ZenviaAPITest {
 
   @Test
   public void testErroNoEnvioPhoneInvalidoValidacaoServidor() throws Exception {
-    expectedException.expect(MTException.class);
-    expectedException.expectMessage("The phone number 556465 is not a valid cellphone number!");
+    expectedException.expect(ProcessorException.class);
+    expectedException.expectMessage(
+        "br.com.ilink.zenviaapisoap.ws.MTException: status=[REFUSED]: The phone number 556465 is not a valid cellphone number!");
 
     SMSRequest req = new SMSRequest();
-    req.setPhone("556465");
+    req.addPhone("556465");
     req.setMessageText(randomAlphabetic(20));
     req.setClientsMessageId(randomNumeric(10));
 
@@ -139,11 +157,12 @@ public class ZenviaAPITest {
 
   @Test
   public void testErroNoEnvioMensagemVaziaValidacaoServidor() throws Exception {
-    expectedException.expect(MTException.class);
-    expectedException.expectMessage("status=[MISSING_PARAMETER]: Missing messageText");
+    expectedException.expect(ProcessorException.class);
+    expectedException.expectMessage(
+        "br.com.ilink.zenviaapisoap.ws.MTException: status=[MISSING_PARAMETER]: Missing messageText");
 
     SMSRequest req = new SMSRequest();
-    req.setPhone(randomNumeric(12));
+    req.addPhone(randomNumeric(12));
     req.setClientsMessageId(randomNumeric(10));
 
     SMSRequestBuilder reqBuild = spy(SMSRequest.builder());
@@ -153,9 +172,10 @@ public class ZenviaAPITest {
   }
 
   @Test
-  public void testErroNoEnvioPhoneVazio() throws Exception {
+  public void testErroNoEnvioPhoneVazio() {
     expectedException.expect(ValidationException.class);
-    expectedException.expectMessage("(phone) Não pode ser vazio.");
+    expectedException.expectMessage(
+        "(phone) Quantidade mínima da lista é 1 e máxima de [SEM LIMITES] itens, informou [0].");
 
     SMSRequest req = SMSRequest.builder()
         .messageText("Mensagem")
@@ -166,7 +186,7 @@ public class ZenviaAPITest {
   }
 
   @Test
-  public void testErroNoEnvioPhoneInvalido() throws Exception {
+  public void testErroNoEnvioPhoneInvalido() {
     expectedException.expect(ValidationException.class);
     expectedException
         .expectMessage("(phone) Quantidade mínimo 12 e máxima de 13 caracteres, informou [5].");
@@ -181,7 +201,7 @@ public class ZenviaAPITest {
   }
 
   @Test
-  public void testErroNoEnvioMensagemVazia() throws Exception {
+  public void testErroNoEnvioMensagemVazia() {
     expectedException.expect(ValidationException.class);
     expectedException.expectMessage("(messageText) Não pode ser vazio.");
 
@@ -201,13 +221,14 @@ public class ZenviaAPITest {
     Whitebox.setInternalState(ZenviaAPI.class, "prop", prop);
 
     SMSRequest req = SMSRequest.builder()
-        .phone("5562996020305")
+        .phone("5562996020304")
         .messageText("Mensagem")
         .clientsMessageId(randomNumeric(5))
         .build();
 
-    expectedException.expect(MTException.class);
-    expectedException.expectMessage("status=[ACCESS_DENIED]: Invalid user and/or password!");
+    expectedException.expect(ProcessorException.class);
+    expectedException.expectMessage(
+        "br.com.ilink.zenviaapisoap.ws.MTException: status=[ACCESS_DENIED]: Invalid user and/or password!");
 
     ZenviaAPI.prepare(req).enviar();
   }

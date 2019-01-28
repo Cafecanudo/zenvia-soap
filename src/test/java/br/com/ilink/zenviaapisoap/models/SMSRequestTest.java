@@ -66,7 +66,7 @@ public class SMSRequestTest {
   @Test
   public void testPhoneVazio() throws ValidationException {
     exceptionGrabber.expect(ValidationException.class);
-    exceptionGrabber.expectMessage("Não pode ser vazio.");
+    exceptionGrabber.expectMessage("(phone) Quantidade mínima da lista é 1 e máxima de [SEM LIMITES] itens, informou [0]");
 
     SMSRequest.builder()
         .messageText(randomAlphabetic(160))

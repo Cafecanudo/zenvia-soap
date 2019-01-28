@@ -2,14 +2,20 @@ package br.com.ilink.zenviaapisoap;
 
 import br.com.ilink.zenviaapisoap.annotations.DefaultBooleanIfNULL;
 import br.com.ilink.zenviaapisoap.annotations.DefaultDateIfNULL;
+import br.com.ilink.zenviaapisoap.annotations.ListNotBlank;
+import br.com.ilink.zenviaapisoap.annotations.ListOnlyNumber;
 import br.com.ilink.zenviaapisoap.annotations.NotBlank;
 import br.com.ilink.zenviaapisoap.annotations.OnlyNumber;
 import br.com.ilink.zenviaapisoap.annotations.Size;
+import br.com.ilink.zenviaapisoap.annotations.SizeEachList;
+import br.com.ilink.zenviaapisoap.annotations.SizeList;
 import br.com.ilink.zenviaapisoap.exceptions.ValidationException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public abstract class BuilderValidation<M> {
 
@@ -59,11 +65,79 @@ public abstract class BuilderValidation<M> {
     if (annotation.annotationType().equals(NotBlank.class)) {
       validarVazio(value, field, (NotBlank) annotation);
     }
+
+    if (annotation.annotationType().equals(SizeList.class)) {
+      verificarTamanhoLista((Set) value, field, (SizeList) annotation);
+    }
+
+    if (annotation.annotationType().equals(ListOnlyNumber.class)) {
+      verificarItemListaSomenteNumero((HashSet) value, field, (ListOnlyNumber) annotation);
+    }
+
+    if (annotation.annotationType().equals(ListNotBlank.class)) {
+      verificarSeItensSaoVazio((HashSet) value, field, (ListNotBlank) annotation);
+    }
+
+    if (annotation.annotationType().equals(SizeEachList.class)) {
+      verificarTamanhoCadaItemLista((HashSet) value, field, (SizeEachList) annotation);
+    }
+
     if (annotation.annotationType().equals(Size.class)) {
       validarTamando((String) value, field, (Size) annotation);
     }
     if (annotation.annotationType().equals(OnlyNumber.class)) {
       validarSomenteNumeros((String) value, field, (OnlyNumber) annotation);
+    }
+  }
+
+  private void verificarTamanhoCadaItemLista(HashSet value, Field field, SizeEachList annotation) {
+    SizeEachList size = annotation;
+    value.stream().forEach(phone -> {
+      if (phone != null && (phone.toString().length() < size.min()
+          || phone.toString().length() > size.max())) {
+        throw new ValidationException(field.getName(),
+            size.message()
+                .replaceAll("\\{cur\\}", String.valueOf(phone.toString().length()))
+                .replaceAll("\\{min\\}", String.valueOf(size.min()))
+                .replaceAll("\\{max\\}",
+                    String.valueOf(size.max() > 0 ? size.max() : "[SEM LIMITES]"))
+        );
+      }
+    });
+  }
+
+  private void verificarSeItensSaoVazio(HashSet value, Field field, ListNotBlank annotation) {
+    ListNotBlank listNotBlank = annotation;
+    value.stream().forEach(_value -> {
+      if (_value == null
+          || (field.getType().equals(String.class) && _value.toString().isEmpty())) {
+        throw new ValidationException(field.getName(), listNotBlank.message());
+      }
+    });
+  }
+
+  private void verificarItemListaSomenteNumero(HashSet value, Field field,
+      ListOnlyNumber annotation) {
+    ListOnlyNumber listOnlyNumber = annotation;
+    value.stream().forEach(_value -> {
+      if (_value != null && !_value.toString().isEmpty() && !_value.toString()
+          .matches("[0-9]+")) {
+        throw new ValidationException(field.getName(), listOnlyNumber.message());
+      }
+    });
+  }
+
+  private void verificarTamanhoLista(Set value, Field field, SizeList annotation) {
+    SizeList size = annotation;
+    Set list = value;
+    if (list == null || list.isEmpty()) {
+      throw new ValidationException(field.getName(),
+          size.message()
+              .replaceAll("\\{cur\\}", String.valueOf(list.size()))
+              .replaceAll("\\{min\\}", String.valueOf(size.min()))
+              .replaceAll("\\{max\\}",
+                  String.valueOf(size.max() > 0 ? size.max() : "[SEM LIMITES]"))
+      );
     }
   }
 
