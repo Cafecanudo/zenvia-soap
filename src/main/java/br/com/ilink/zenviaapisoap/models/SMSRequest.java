@@ -48,6 +48,13 @@ public class SMSRequest {
 
     private Set<String> phone = new HashSet<>();
 
+    public SMSRequest.SMSRequestBuilder phone(Set<String> phone) {
+      if (phone != null && !phone.isEmpty()) {
+        this.phone.addAll(phone);
+      }
+      return this;
+    }
+
     public SMSRequest.SMSRequestBuilder phone(String phone) {
       if (phone != null) {
         this.phone.add(phone);
