@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:tns="http://impl.webservice.gateway.springwireless.com/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:ns1="http://basic.webservice.gateway.springwireless.com/" name="BasicSMS"
+  targetNamespace="http://impl.webservice.gateway.springwireless.com/">
+  <wsdl:import location="http://webservice.zenvia360.com.br:50983/BasicMT?wsdl=BasicMT.wsdl"
+    namespace="http://basic.webservice.gateway.springwireless.com/">
+  </wsdl:import>
+  <wsdl:binding name="BasicSMSSoapBinding" type="ns1:BasicMT">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="checkStatus">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="checkStatus">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="checkStatusResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="MTException">
+        <soap:fault name="MTException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="checkStatusByClientsId">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="checkStatusByClientsId">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="checkStatusByClientsIdResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="MTException">
+        <soap:fault name="MTException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="send">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="send">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="sendResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="MTException">
+        <soap:fault name="MTException" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="BasicSMS">
+    <wsdl:port binding="tns:BasicSMSSoapBinding" name="BasicMT">
+      <soap:address location="http://webservice.zenvia360.com.br:50983/BasicMT"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

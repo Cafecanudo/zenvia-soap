@@ -5,32 +5,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "checkStatus", propOrder = {
-    "user",
-    "password",
+@XmlType(name = "sendResponse", propOrder = {
     "messageId"
 })
-public class CheckStatus {
+public class SendResponse {
 
-  protected String user;
-  protected String password;
   protected long messageId;
-
-  public String getUser() {
-    return user;
-  }
-
-  public void setUser(String value) {
-    this.user = value;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String value) {
-    this.password = value;
-  }
 
   public long getMessageId() {
     return messageId;

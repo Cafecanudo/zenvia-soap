@@ -3,23 +3,33 @@ package br.com.ilink.zenviaapisoap.ws;
 import javax.xml.ws.WebFault;
 
 @WebFault(name = "ErrorHandlingMT", targetNamespace = "http://basic.webservice.gateway.springwireless.com/")
-public class MTException
-    extends Exception {
+public class MTException extends Exception {
 
-  private ErrorHandlingMT faultInfo;
+  private ErrorHandlingMT errorHandlingMT;
 
-  public MTException(String message, ErrorHandlingMT faultInfo) {
-    super(message);
-    this.faultInfo = faultInfo;
+  public MTException() {
+    super();
   }
 
-  public MTException(String message, ErrorHandlingMT faultInfo, Throwable cause) {
+  public MTException(String message) {
+    super(message);
+  }
+
+  public MTException(String message, Throwable cause) {
     super(message, cause);
-    this.faultInfo = faultInfo;
+  }
+
+  public MTException(String message, ErrorHandlingMT errorHandlingMT) {
+    super(message);
+    this.errorHandlingMT = errorHandlingMT;
+  }
+
+  public MTException(String message, ErrorHandlingMT errorHandlingMT, Throwable cause) {
+    super(message, cause);
+    this.errorHandlingMT = errorHandlingMT;
   }
 
   public ErrorHandlingMT getFaultInfo() {
-    return faultInfo;
+    return this.errorHandlingMT;
   }
-
 }
