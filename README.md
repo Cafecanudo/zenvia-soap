@@ -58,5 +58,13 @@ Configurações
       ERROR: [Ouve falha no envio]
     }
     
+  Espeficicando usuário e senha
+  
+    SMSResponse response = ZenviaAPI
+          .config(
+              ZenviaConfig.build("Usuario", "senha")
+            )
+          .prepare(requisicao).enviar();
+    
 #### Dúvidas 
 [by Wellton S. Barros - makotostudiodev@gmail.com](https://github.com/Cafecanudo/zenvia)

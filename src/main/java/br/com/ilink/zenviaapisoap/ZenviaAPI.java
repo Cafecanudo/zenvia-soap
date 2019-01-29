@@ -5,6 +5,7 @@ import br.com.ilink.zenviaapisoap.exceptions.ValidationException;
 import br.com.ilink.zenviaapisoap.models.SMSRequest;
 import br.com.ilink.zenviaapisoap.models.SMSResponse;
 import br.com.ilink.zenviaapisoap.models.SMSResponseCheckProtocolo;
+import br.com.ilink.zenviaapisoap.models.ZenviaConfig;
 import br.com.ilink.zenviaapisoap.ws.BasicMT;
 import br.com.ilink.zenviaapisoap.ws.BasicSMS;
 import br.com.ilink.zenviaapisoap.ws.MTException;
@@ -27,16 +28,42 @@ public class ZenviaAPI {
     }
   }
 
+  public static Config config(ZenviaConfig zenviaConfig) {
+    return new ZenviaAPI.Config(zenviaConfig);
+  }
+
   public static EnviarSMS prepare(SMSRequest req) {
-    return new ZenviaAPI.EnviarSMS(req);
+    return new ZenviaAPI.EnviarSMS(req, null);
   }
 
   public static CheckSMS prepare(long messageId) {
-    return new ZenviaAPI.CheckSMS(messageId);
+    return new ZenviaAPI.CheckSMS(messageId, null);
   }
 
   public static CheckSMS prepare(String clientsMessageId) {
-    return new ZenviaAPI.CheckSMS(clientsMessageId);
+    return new ZenviaAPI.CheckSMS(clientsMessageId, null);
+  }
+
+  public static class Config {
+
+    private ZenviaConfig zenviaConfig;
+
+    public Config(ZenviaConfig zenviaConfig) {
+      this.zenviaConfig = zenviaConfig;
+    }
+
+    public EnviarSMS prepare(SMSRequest req) {
+      return new ZenviaAPI.EnviarSMS(req, zenviaConfig);
+    }
+
+    public CheckSMS prepare(long messageId) {
+      return new ZenviaAPI.CheckSMS(messageId, zenviaConfig);
+    }
+
+    public CheckSMS prepare(String clientsMessageId) {
+      return new ZenviaAPI.CheckSMS(clientsMessageId, zenviaConfig);
+    }
+
   }
 
   /**
@@ -46,12 +73,13 @@ public class ZenviaAPI {
 
     private long messageId;
     private String clientsMessageId;
+    private ZenviaConfig zenviaConfig;
 
-    public CheckSMS(long messageId) {
+    public CheckSMS(long messageId, ZenviaConfig zenviaConfig) {
       this.messageId = messageId;
     }
 
-    public CheckSMS(String clientsMessageId) {
+    public CheckSMS(String clientsMessageId, ZenviaConfig zenviaConfig) {
       this.clientsMessageId = clientsMessageId;
     }
 
@@ -67,7 +95,10 @@ public class ZenviaAPI {
       BasicMT basic = new BasicSMS().getBasicMT();
       if (this.clientsMessageId != null) {
         return basic.checkStatusByClientsId(
-            prop.getProperty("config.user"), prop.getProperty("config.password"),
+            ((zenviaConfig != null && zenviaConfig.getUsuario() != null) ? zenviaConfig.getUsuario()
+                : prop.getProperty("config.user")),
+            ((zenviaConfig != null && zenviaConfig.getSenha() != null) ? zenviaConfig.getSenha()
+                : prop.getProperty("config.password")),
             this.clientsMessageId
         );
       }
@@ -82,9 +113,11 @@ public class ZenviaAPI {
   public static class EnviarSMS {
 
     private SMSRequest req;
+    private ZenviaConfig zenviaConfig;
 
-    private EnviarSMS(SMSRequest req) {
+    public EnviarSMS(SMSRequest req, ZenviaConfig zenviaConfig) {
       this.req = req;
+      this.zenviaConfig = zenviaConfig;
     }
 
     public List<SMSResponse> enviar() {
@@ -103,7 +136,10 @@ public class ZenviaAPI {
     private Long send(String phone) {
       try {
         return new BasicSMS().getBasicMT().send(
-            prop.getProperty("config.user"), prop.getProperty("config.password"),
+            ((zenviaConfig != null && zenviaConfig.getUsuario() != null) ? zenviaConfig.getUsuario()
+                : prop.getProperty("config.user")),
+            ((zenviaConfig != null && zenviaConfig.getSenha() != null) ? zenviaConfig.getSenha()
+                : prop.getProperty("config.password")),
             phone, this.req.getMessageText(), this.req.getClientsMessageId()
         );
       } catch (MTException e) {
